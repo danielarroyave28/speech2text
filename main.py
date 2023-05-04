@@ -13,6 +13,7 @@ from email import encoders
 from email.mime.multipart import MIMEMultipart
 from credentials import useName, passWord, APIKEY
 from imap_tools import MailBox, AND
+import whisper
 
 while True:
 
@@ -45,8 +46,9 @@ while True:
                 if duration < 300 and duration > 0.1:
                     if filename.endswith('.wav'):
                         audio_file = open(directory+filename, "rb")
-                        transcript = openai.Audio.transcribe("whisper-1", audio_file)
-                        text = transcript.text
+                        model = whisper.load_model('small')
+                        transcript = model.transcribe(audio=directory+filename, fp16=False)
+                        text = transcript['text']
                         print(text)
                         print(filename)
 
@@ -54,6 +56,7 @@ while True:
                         attach = MIMEBase("application", "octet-stream")
                         attach.set_payload(audio_file.read())
                         encoders.encode_base64(attach)
+                        attach.add_header('Content-Disposition', f"attachment; filename = {filename}")
                         subject = msg.subject
 
                         em = MIMEMultipart()
