@@ -12,11 +12,14 @@ from email.mime.base import MIMEBase
 from email import encoders
 from email.mime.multipart import MIMEMultipart
 from credentials import useName, passWord, APIKEY
-from imap_tools import MailBox, AND
+import imap_tools
+from imap_tools import MailBox, AND, A
 import whisper
+import datetime
 
 while True:
 
+    context = ssl.create_default_context()
     imap_url = 'imap.gmail.com'
     my_mail = imaplib.IMAP4_SSL(imap_url)
     my_mail.login(useName, passWord)
@@ -27,16 +30,17 @@ while True:
     openai.api_key = APIKEY
 
     my_mail.select('Inbox')
+    #from_ = "noreply@soho66.co.uk"
 
-    with MailBox(imap_url).login(useName,passWord,'INBOX') as mailbox:
-        for msg in mailbox.fetch(criteria=AND(seen=True,from_="noreply@soho66.co.uk"),mark_seen=False):
+
+    with MailBox(imap_url, ssl_context=context).login(useName,passWord,'INBOX') as mailbox:
+        for msg in mailbox.fetch(AND(from_ = "noreply@soho66.co.uk",seen=False), mark_seen=True,bulk=True):
             for att in msg.attachments:
                 print(att.filename, att.content_type)
                 if att.filename.lower().endswith('.wav'):
                     with open('C:/Users/admin/Documents/audios/{}'.format(att.filename), 'wb') as f:
                         f.write(att.payload)
                         f.close()
-
 
 
 
@@ -83,7 +87,7 @@ while True:
                         em.attach(part1)
                         em.attach(attach)
 
-                        context = ssl.create_default_context()
+
 
                         server = smtplib.SMTP('smtp.gmail.com', 587)
                         server.ehlo()
@@ -103,7 +107,5 @@ while True:
                 os.remove(os.path.join(directory,filename))
 
 
-
-    mailbox.logout()
-
+    print('sleeping 5 mins, waiting for new voicemail attachment')
     time.sleep(600)
