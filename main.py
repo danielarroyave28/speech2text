@@ -1,7 +1,6 @@
 import imaplib
 import email
 import os
-import openai
 import librosa
 import time
 from email.message import EmailMessage
@@ -23,11 +22,11 @@ while True:
         imap_url = 'imap.gmail.com'
         my_mail = imaplib.IMAP4_SSL(imap_url)
         my_mail.login(useName, passWord)
-        directory = "C:/Users/admin/Documents/audios/"
+        directory = "C:/Users/fatis/speech2text/audios/"
 
         email_sender = useName
         email_receiver = useName
-        openai.api_key = APIKEY
+        
 
         my_mail.select('Inbox')
         # from_ = "noreply@soho66.co.uk"
@@ -37,7 +36,7 @@ while True:
                 for att in msg.attachments:
                     print(att.filename, att.content_type)
                     if att.filename.lower().endswith('.wav'):
-                        with open('C:/Users/admin/Documents/audios/{}'.format(att.filename), 'wb') as f:
+                        with open('C:/Users/fatis/speech2text/audios/{}'.format(att.filename), 'wb') as f:
                             f.write(att.payload)
                             f.close()
 
@@ -104,8 +103,8 @@ while True:
 
             # mailbox.logout()
 
-        print('sleeping 5 mins, waiting for new voicemail attachment')
+        print('sleeping 10 secs, waiting for new voicemail attachment')
 
     except imaplib.IMAP4.abort as e:
         print("IMAP abort, trying again")
-    time.sleep(600)
+    time.sleep(10)
